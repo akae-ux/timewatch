@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrono Planetoid</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
+    <!-- Local Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="background-glow"></div>
+    <main class="app-container glass-panel">
+        <header class="app-header">
+            <h1 class="visually-hidden">Chrono Planetoid Clock</h1>
+            <button id="viewToggle" class="toggle-btn" aria-label="表示切り替え">
+                <span class="toggle-text">Digital Mode</span>
+                <div class="toggle-icon"></div>
+            </button>
+        </header>
+
+        <div class="clock-container" id="clockContainer">
+            <!-- Analog Clock -->
+            <div class="analog-clock active" id="analogClock">
+                <div class="clock-face">
+                    <!-- Markers will be positioned by CSS/JS, but let's list them 1-12 -->
+                    <div class="marker val-1">1</div>
+                    <div class="marker val-2">2</div>
+                    <div class="marker val-3">3</div>
+                    <div class="marker val-4">4</div>
+                    <div class="marker val-5">5</div>
+                    <div class="marker val-6">6</div>
+                    <div class="marker val-7">7</div>
+                    <div class="marker val-8">8</div>
+                    <div class="marker val-9">9</div>
+                    <div class="marker val-10">10</div>
+                    <div class="marker val-11">11</div>
+                    <div class="marker val-12">12</div>
+                    <div class="hand hour-hand" id="hourHand"></div>
+                    <div class="hand minute-hand" id="minuteHand"></div>
+                    <div class="hand second-hand" id="secondHand"></div>
+                    <div class="center-dot"></div>
+                </div>
+            </div>
+
+            <!-- Digital Clock -->
+            <div class="digital-clock" id="digitalClock">
+                <div class="time-display">
+                    <span id="digitalTime">00:00:00</span>
+                    <span id="amPm" class="am-pm">AM</span>
+                </div>
+                <div class="date-display" id="digitalDate">
+                    YYYY.MM.DD
+                </div>
+            </div>
+        </div>
+
+        <!-- Weather Display -->
+        <div class="weather-container" id="weatherContainer">
+            <div class="weather-loading">Loading weather...</div>
+            <div class="weather-content hidden">
+                <div class="weather-main">
+                    <span id="weatherIcon" class="weather-icon">☀</span>
+                    <span id="temperature">--°C</span>
+                </div>
+                <div class="weather-details">
+                    <span id="weatherDesc">Clear Sky</span>
+                    <span id="locationName">Unknown Location</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extras Container -->
+        <div class="extras-container">
+            <!-- Fortune Teller -->
+            <div class="glass-panel-xs fortune-box">
+                <button id="fortuneBtn" class="action-btn">🔮 今日の運勢を占う</button>
+                <div id="fortuneResult" class="fortune-result hidden">
+                    <span id="fortuneRank" class="fortune-rank">大吉</span>
+                    <p id="fortuneText" class="fortune-text">最高の1日になりそうです！</p>
+                </div>
+            </div>
+
+            <!-- Stress Meter -->
+            <div class="glass-panel-xs stress-box">
+                <div class="stress-header">
+                    <span>ストレス度</span>
+                    <span id="stressValue">0%</span>
+                </div>
+                <div class="stress-bar-bg">
+                    <div id="stressBar" class="stress-bar-fill"></div>
+                </div>
+                <p id="stressMsg" class="stress-msg">リラックスしています</p>
+            </div>
+        </div>
+
+        <div class="message-area glass-panel-sm">
+            <p id="aiMessage" class="typing-effect">システム起動中...</p>
+        </div>
+    </main>
+
+    <script src="secrets.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
