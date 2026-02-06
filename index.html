@@ -115,7 +115,7 @@
         // Fallback if secrets.js is missing (e.g. on Vercel)
         if (typeof CONFIG === 'undefined') {
             console.log("No secrets found. Using default/empty config.");
-            var CONFIG = { OPENAI_API_KEY: "", WEATHER_API_KEY: "" };
+            var CONFIG = { GEMINI_API_KEY: "", WEATHER_API_KEY: "" };
         }
     </script>
     <script src="script.js"></script>

@@ -457,43 +457,52 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.value = "";
 
         // Check API Key
-        if (!CONFIG.OPENAI_API_KEY) {
+        if (!CONFIG.GEMINI_API_KEY) {
             setTimeout(() => {
-                elements.aiMessage.textContent = "APIキーが設定されていません。secrets.jsを確認してください。";
+                elements.aiMessage.textContent = "Gemini APIキーが設定されていません。secrets.jsを確認してください。";
             }, 500);
             return;
         }
 
         try {
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            // Gemini API URL
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
+
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${CONFIG.OPENAI_API_KEY}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: "gpt-3.5-turbo",
-                    messages: [
-                        { role: "system", content: "You are a helpful and stylish clock AI assistant. Keep responses short and polite (under 60 chars)." },
-                        { role: "user", content: text }
-                    ],
-                    max_tokens: 60
+                    contents: [{
+                        parts: [{
+                            text: `あなたはオシャレな時計のアシスタントAIです。短く、丁寧かつフレンドリーに返答してください（60文字以内）。質問: ${text}`
+                        }]
+                    }],
+                    generationConfig: {
+                        maxOutputTokens: 60,
+                        temperature: 0.7
+                    }
                 })
             });
 
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Gemini API Error: ${response.status} ${errorData.error?.message || response.statusText}`);
+            }
+
             const data = await response.json();
-            if (data.choices && data.choices.length > 0) {
-                const reply = data.choices[0].message.content;
+            if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+                const reply = data.candidates[0].content.parts[0].text;
                 elements.aiMessage.textContent = reply;
-                // Re-trigger animation
                 void elements.aiMessage.offsetWidth;
                 elements.aiMessage.classList.add('typing-effect');
             } else {
-                throw new Error("No response");
+                throw new Error("返答を生成できませんでした。");
             }
         } catch (error) {
             console.error(error);
-            elements.aiMessage.textContent = "通信エラーが発生しました。";
+            elements.aiMessage.textContent = `エラー: ${error.message}`;
         }
     }
 
