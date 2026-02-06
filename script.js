@@ -377,15 +377,129 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.viewToggle.addEventListener('click', toggleView);
     elements.fortuneBtn.addEventListener('click', drawFortune);
 
-    // Initial
-    updateClock();
-    updateMessage();
-    initWeather();
-
     // Loops
     setInterval(updateClock, 1000);
     setInterval(updateMessage, 1000 * 60 * 60);
     setInterval(initWeather, 1000 * 60 * 30);
-    setInterval(updateStress, 500); // Check stress every 0.5s
+    setInterval(updateStress, 500);
+    setInterval(updateThemeColor, 1000 * 60); // Check color every minute
+
+    // Initial Calls
+    updateClock();
+    updateThemeColor();
+    updateMessage();
+    initWeather();
+
+    /**
+     * Dynamic Theme Color Logic
+     */
+    function updateThemeColor() {
+        const hour = new Date().getHours();
+        const root = document.documentElement;
+        let accentColor, glowColor, secondaryColor;
+
+        // Morning (5-10): Cyan/Green (Fresh)
+        if (hour >= 5 && hour < 11) {
+            accentColor = '#00f3ff'; // Cyan
+            secondaryColor = '#00ff9d'; // Spring Green
+        }
+        // Day (11-16): Orange/Yellow (Bright)
+        else if (hour >= 11 && hour < 17) {
+            accentColor = '#ffaa00'; // Orange
+            secondaryColor = '#ffea00'; // Yellow
+        }
+        // Evening (17-19): Purple/Pink (Sunset)
+        else if (hour >= 17 && hour < 20) {
+            accentColor = '#ff0055'; // Pink
+            secondaryColor = '#bd00ff'; // Purple
+        }
+        // Night (20-4): Deep Blue/Neon Blue (Cyberpunk)
+        else {
+            accentColor = '#4d4dff'; // Neon Blue
+            secondaryColor = '#00f3ff'; // Light Blue
+        }
+
+        glowColor = `rgba(${hexToRgb(accentColor)}, 0.6)`;
+
+        root.style.setProperty('--accent-color', accentColor);
+        root.style.setProperty('--accent-glow', glowColor);
+        root.style.setProperty('--secondary-accent', secondaryColor);
+    }
+
+    // Helper to convert hex to rgb for glow
+    function hexToRgb(hex) {
+        let r = 0, g = 0, b = 0;
+        if (hex.length === 4) {
+            r = parseInt("0x" + hex[1] + hex[1]);
+            g = parseInt("0x" + hex[2] + hex[2]);
+            b = parseInt("0x" + hex[3] + hex[3]);
+        } else if (hex.length === 7) {
+            r = parseInt("0x" + hex[1] + hex[2]);
+            g = parseInt("0x" + hex[3] + hex[4]);
+            b = parseInt("0x" + hex[5] + hex[6]);
+        }
+        return `${r}, ${g}, ${b}`;
+    }
+
+    /**
+     * AI Chat Logic
+     */
+    const chatInput = document.getElementById('userChtInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    async function handleChat() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        // UI Update
+        elements.aiMessage.textContent = "考え中...";
+        elements.aiMessage.classList.remove('typing-effect');
+        chatInput.value = "";
+
+        // Check API Key
+        if (!CONFIG.OPENAI_API_KEY) {
+            setTimeout(() => {
+                elements.aiMessage.textContent = "APIキーが設定されていません。secrets.jsを確認してください。";
+            }, 500);
+            return;
+        }
+
+        try {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${CONFIG.OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: [
+                        { role: "system", content: "You are a helpful and stylish clock AI assistant. Keep responses short and polite (under 60 chars)." },
+                        { role: "user", content: text }
+                    ],
+                    max_tokens: 60
+                })
+            });
+
+            const data = await response.json();
+            if (data.choices && data.choices.length > 0) {
+                const reply = data.choices[0].message.content;
+                elements.aiMessage.textContent = reply;
+                // Re-trigger animation
+                void elements.aiMessage.offsetWidth;
+                elements.aiMessage.classList.add('typing-effect');
+            } else {
+                throw new Error("No response");
+            }
+        } catch (error) {
+            console.error(error);
+            elements.aiMessage.textContent = "通信エラーが発生しました。";
+        }
+    }
+
+    sendBtn.addEventListener('click', handleChat);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleChat();
+    });
 
 });
